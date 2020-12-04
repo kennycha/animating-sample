@@ -1,24 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react'
+import styled from 'styled-components'
+import { useRendering } from './useRendering'
 
-function App() {
+const Title = styled.div`
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+`
+
+const Input = styled.input``
+
+const RenderingDiv = styled.div`
+  min-height: 1024px;
+`
+
+const id = 'renderingDiv'
+
+const App = () => {
+  const [inputUrl, setInputUrl] = useState(undefined);
+
+  const onFileChange = (event) => {
+    const file = event.target.files[0];
+    const fileUrl = URL.createObjectURL(file);
+    setInputUrl(fileUrl);
+  }
+
+  useRendering({ id, inputUrl })
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Title>Animating Sample</Title>
+      <Input type='file' accept='.fbx' onChange={onFileChange}/>
+      <RenderingDiv id='renderingDiv'></RenderingDiv>
+    </>
   );
 }
 

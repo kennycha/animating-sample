@@ -17,7 +17,7 @@
   - HemisphereLight
   - DirectionalLight
     - spotlight 대체 하는게 나을 듯
-
+  
 - update function
 
   - ```
@@ -27,7 +27,7 @@
   - ```
     Inside our update function the renderer renders the scene and camera, and the update is run again. 
     ```
-
+  
   - ```js
     function update() {
       renderer.render(scene, camera);
@@ -35,9 +35,9 @@
     }
     update();
     ```
-
+  
   - `init()` 함수 내부가 아니라 뒤에 위치
-
+  
 - canvas resize
 
   - renderer 와 canvas 의 크기가 같은지 비교
@@ -62,7 +62,7 @@
     ```
 
   - `update()` 함수 내부에 위치
-
+  
 - animation mixer
 
   - animation player
@@ -220,4 +220,3 @@
 - **getDelta**
 - 
 
-https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
