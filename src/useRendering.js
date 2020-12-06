@@ -8,11 +8,12 @@ import _ from 'lodash';
 
 const MAP_TYPES = ['map', 'aoMap', 'emissiveMap', 'glossinessMap', 'metalnessMap', 'normalMap', 'roughnessMap', 'specularMap'];
 
-export const useRendering = ({ id, inputUrl }) => {
+let innerMixer;
+
+export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) => {
   const [contents, setContents] = useState([]);
   const [theScene, setTheScene] = useState(undefined);
   const [currentBone, setCurrentBone] = useState(undefined);
-  const [mixer, setMixer] = useState(undefined);
 
   const clock = new THREE.Clock();
 
@@ -157,7 +158,8 @@ export const useRendering = ({ id, inputUrl }) => {
   }, [])
   
   const createMixer = ({ object }) => {
-    setMixer(new THREE.AnimationMixer(object));
+    innerMixer = new THREE.AnimationMixer(object)
+    setMixer(innerMixer);
   };
 
   const addModel = ({ scene, object }) => {
@@ -311,13 +313,14 @@ export const useRendering = ({ id, inputUrl }) => {
     addGround({ scene, camera, renderer });
     const cameraControls = createCameraControls({ camera, renderer });
     const transformControls = createTransformControls({ scene, camera, renderer, cameraControls })
-
     if (inputUrl) {
       // keydown 이벤트 발생 안함 (마우스 클릭은 정상 발생)
+      // renderingDiv.addEventListener('keydown', (event) => console.log('keydown happened'));
       renderingDiv.addEventListener('keydown', (event) => onKeyDown({ event, transformControls }));
       renderingDiv.addEventListener('keyup', (event) => onKeyUp({ event, transformControls }));
       const loader = new FBXLoader();
       loader.load(inputUrl, (object) => {
+        setLoadedObj(object);
         createMixer({ object });
         const model = addModel({ scene, object });
         const skeletonHelper = addSkeletonHelper({ scene, model });
@@ -328,20 +331,18 @@ export const useRendering = ({ id, inputUrl }) => {
     renderingDiv.appendChild(renderer.domElement);
 
     const update = () => {
-      if (mixer) {
-        mixer.update(clock.getDelta());
+      if (innerMixer) {
+        innerMixer.update(clock.getDelta());
       }
-
       if (resizeRendererToDisplaySize({ renderer })) {
         const canvas = renderer.domElement;
         camera.aspect = canvas.clientWidth / canvas.clientHeight;
         camera.updateProjectionMatrix();
       }
-
       renderer.render(scene, camera);
       requestAnimationFrame(update);
     }
-    
+
     update();
 
     return () => {
