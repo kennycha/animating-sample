@@ -26,9 +26,9 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
   }, [])
 
   const clearRendering = useCallback(({ renderingDiv }) => {
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup', onKeyUp);
     if (renderingDiv) {
-      renderingDiv.removeEventListener('keydown', onKeyDown);
-      renderingDiv.removeEventListener('keyup', onKeyUp);
       while (renderingDiv.firstChild) {
         renderingDiv.removeChild(renderingDiv.firstChild);
       }
@@ -152,6 +152,9 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
     transformControls.addEventListener('dragging-changed', (event) => {
       cameraControls.enabled = !event.value;
     });
+    transformControls.addEventListener('objectChange', (event) => {
+      console.log(event.target.object);
+    })
     setContents([...contents, transformControls]);
     scene.add(transformControls);
     return transformControls;
@@ -216,7 +219,6 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
   };
 
   const onKeyDown = ({ event, transformControls }) => {
-    console.log(transformControls)
     switch (event.keyCode) {
       case 27: // esc
       // 현재 transformControl 붙어 있는 것 제거
@@ -314,10 +316,8 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
     const cameraControls = createCameraControls({ camera, renderer });
     const transformControls = createTransformControls({ scene, camera, renderer, cameraControls })
     if (inputUrl) {
-      // keydown 이벤트 발생 안함 (마우스 클릭은 정상 발생)
-      // renderingDiv.addEventListener('keydown', (event) => console.log('keydown happened'));
-      renderingDiv.addEventListener('keydown', (event) => onKeyDown({ event, transformControls }));
-      renderingDiv.addEventListener('keyup', (event) => onKeyUp({ event, transformControls }));
+      document.addEventListener('keydown', (event) => onKeyDown({ event, transformControls }));
+      document.addEventListener('keyup', (event) => onKeyUp({ event, transformControls }));
       const loader = new FBXLoader();
       loader.load(inputUrl, (object) => {
         setLoadedObj(object);

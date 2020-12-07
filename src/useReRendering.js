@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react'
 import * as THREE from 'three'
-import _ from 'lodash';
 
 export const useReRendering = ({ mixer, loadedObj, setCurrentClip, setPossibleClips }) => {
   const createAnimationClips = useCallback(({ object }) => {

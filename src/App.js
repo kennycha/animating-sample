@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useRendering } from './useRendering'
 import { useReRendering } from './useReRendering'
+import _ from 'lodash'
 
 const Title = styled.div`
   height: 50px;
@@ -42,6 +43,7 @@ const App = () => {
   const [mixer, setMixer] = useState(undefined);
   const [currentClip, setCurrentClip] = useState(undefined);
   const [possibleClips, setPossibleClips] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const onFileChange = (event) => {
     const file = event.target.files[0];
@@ -68,20 +70,34 @@ const App = () => {
     mixer.timeScale = 0;
   }
 
-  const onStopButtonBlick = () => {
+  const onStopButtonClick = () => {
     currentClip.stop();
   }
 
   const onAnimButtonClick = ({ clip }) => {
-    console.log(clip._clip.name)
     currentClip.stop();
     setCurrentClip(clip);
+  }
+
+  // 특정 인덱스(input value)로 이동
+  // 구분을 위해 한 번만 재생
+  const onPressEnter = (event) => {
+    if (event.key === "Enter") {
+      const targetIdx = parseInt(event.target.value % currentClip._clip.tracks[0].times.length);
+      if (_.isFinite(targetIdx)) {
+        setCurrentIndex(targetIdx);
+        currentClip.reset();
+        currentClip.setLoop(1, 1)
+        const targetTime = parseFloat(currentClip._clip.tracks[0].times[targetIdx] / mixer.timeScale);
+        mixer.setTime(targetTime);
+      }
+    }
   }
 
   useRendering({ id, inputUrl, setLoadedObj, mixer, setMixer })
   
   useReRendering({ mixer, loadedObj, setCurrentClip, setPossibleClips })
-
+  
   return (
     <>
       <Title>Animating Sample</Title>
@@ -93,8 +109,9 @@ const App = () => {
           <Button onClick={onBackwardButtonClick}>Backward</Button>
           <Button onClick={onForwardButtonClick}>Forward</Button>
           <Button onClick={onPauseButtonClick}>Pause</Button>
-          <Button onClick={onStopButtonBlick}>Stop</Button>
+          <Button onClick={onStopButtonClick}>Stop</Button>
         </ButtonContainer>)}
+      {currentClip && <Input onKeyPress={onPressEnter} />}
       {possibleClips.length !== 0 && 
         (<ButtonContainer>
           {possibleClips && 
