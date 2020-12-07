@@ -1,5 +1,12 @@
 import { useCallback, useEffect } from 'react'
 import * as THREE from 'three'
+import _ from 'lodash'
+
+const MODE_MAP = {
+  translate: 'position',
+  rotate: 'quaternion',
+  scale: 'scale',
+}
 
 export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentAction, setPossibleActions, currentIndex, theTransformControls }) => {  
   const createAnimationActions = useCallback(({ object }) => {
@@ -13,21 +20,29 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
     setPossibleActions(fileActions);
   }, [mixer, loadedObj])
 
-  const addConvertingEventlistener = ({ transformControls, mixer }) => {
+  const addConvertingEventlistener = ({ transformControls, animationMixer, targetClip, targetIndex }) => {
     transformControls.addEventListener('objectChange', (event) => {
-      console.log(currentAction);
+      const targetBone = event.target.object
+      const targetTrack = _.find(targetClip.tracks, (track) => track.name === `${targetBone.name}.${MODE_MAP[transformControls.mode]}`)
       switch (transformControls.mode) {
         case 'translate':
-
-          console.log(event.target.object.position);
+          const { x: posX, y: posY, z: posZ } = event.target.object.position
+          targetTrack.values[3 * targetIndex] = posX
+          targetTrack.values[3 * targetIndex + 1] = posY
+          targetTrack.values[3 * targetIndex + 2] = posZ
           break
         case 'rotate':
-          
-          console.log(event.target.object.quaternion);
+          const { w: rotW, x: rotX, y: rotY, z: rotZ } = event.target.object.quaternion
+          targetTrack.values[4 * targetIndex] = rotW
+          targetTrack.values[4 * targetIndex + 1] = rotX
+          targetTrack.values[4 * targetIndex + 2] = rotY
+          targetTrack.values[4 * targetIndex + 3] = rotZ
           break
         case 'scale':
-          
-          console.log(event.target.object.scale);
+          const { x: scaX, y: scaY, z: scaZ } = event.target.object.scale
+          targetTrack.values[3 * targetIndex] = scaX
+          targetTrack.values[3 * targetIndex + 1] = scaY
+          targetTrack.values[3 * targetIndex + 2] = scaZ
           break
         default:
           break;
@@ -38,7 +53,13 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
   useEffect(() => {
     if (mixer) {
       createAnimationActions({ object: loadedObj })
-      addConvertingEventlistener({ transformControls: theTransformControls, mixer });
     }
   }, [mixer])
+
+  useEffect(() => {
+    if (currentAction) {
+      const targetClip = currentAction.getClip()
+      addConvertingEventlistener({ transformControls: theTransformControls, animationMixer: mixer, targetClip, targetIndex: currentIndex });
+    }
+  }, [currentAction, currentIndex])
 }
