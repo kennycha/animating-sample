@@ -10,7 +10,7 @@ const MAP_TYPES = ['map', 'aoMap', 'emissiveMap', 'glossinessMap', 'metalnessMap
 
 let innerMixer;
 
-export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) => {
+export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer, setTheTransfromControls }) => {
   const [contents, setContents] = useState([]);
   const [theScene, setTheScene] = useState(undefined);
   const [currentBone, setCurrentBone] = useState(undefined);
@@ -146,15 +146,13 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
 
   const createTransformControls = useCallback(({ scene, camera, renderer, cameraControls }) => {
     const transformControls = new TransformControls(camera, renderer.domElement);
+    setTheTransfromControls(transformControls);
     transformControls.addEventListener('change', () => {
       renderer.render(scene, camera);
     });
     transformControls.addEventListener('dragging-changed', (event) => {
       cameraControls.enabled = !event.value;
     });
-    transformControls.addEventListener('objectChange', (event) => {
-      console.log(event.target.object);
-    })
     setContents([...contents, transformControls]);
     scene.add(transformControls);
     return transformControls;
@@ -195,7 +193,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
       })
       boneMaterial.depthWrite = false;
       boneMaterial.depthTest = false;
-      const boneGeometry = new THREE.SphereBufferGeometry(1, 32, 32);
+      const boneGeometry = new THREE.SphereBufferGeometry(2, 32, 32);
       const boneMesh = new THREE.Mesh(boneGeometry, boneMaterial);
       bone.add(boneMesh);
     })
@@ -212,6 +210,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer }) =>
         setCurrentBone(event.object.parent);
         dragControls.enabled = false;
       }
+      innerMixer.timeScale = 0; // joint mesh 클릭 시 애니메이션 중지
     });
     dragControls.addEventListener('dragend', (event) => {
       dragControls.enabled = true;

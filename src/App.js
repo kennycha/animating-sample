@@ -41,29 +41,32 @@ const App = () => {
   const [inputUrl, setInputUrl] = useState(undefined);
   const [loadedObj, setLoadedObj] = useState(undefined);
   const [mixer, setMixer] = useState(undefined);
-  const [currentClip, setCurrentClip] = useState(undefined);
-  const [possibleClips, setPossibleClips] = useState([]);
+  const [currentAction, setCurrentAction] = useState(undefined);
+  const [possibleActions, setPossibleActions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [theTransformControls, setTheTransfromControls] = useState(undefined);
 
   const onFileChange = (event) => {
     const file = event.target.files[0];
-    const fileUrl = URL.createObjectURL(file);
-    setInputUrl(fileUrl);
+    if (Boolean(file)) {
+      const fileUrl = URL.createObjectURL(file);
+      setInputUrl(fileUrl);
+    }
   }
 
   const onResetButtonClick = () => {
     mixer.setTime(0);
-    currentClip.reset();
+    currentAction.reset();
   }
   
   const onBackwardButtonClick = () => {
     mixer.timeScale = -0.3;
-    currentClip.play();
+    currentAction.play();
   }
 
   const onForwardButtonClick = () => {
     mixer.timeScale = 0.3;
-    currentClip.play();
+    currentAction.play();
   }
 
   const onPauseButtonClick = () => {
@@ -71,39 +74,41 @@ const App = () => {
   }
 
   const onStopButtonClick = () => {
-    currentClip.stop();
+    currentAction.stop();
   }
 
-  const onAnimButtonClick = ({ clip }) => {
-    currentClip.stop();
-    setCurrentClip(clip);
+  const onAnimButtonClick = ({ action }) => {
+    currentAction.stop();
+    setCurrentAction(action);
   }
 
   // 특정 인덱스(input value)로 이동
-  // 구분을 위해 한 번만 재생
   const onPressEnter = (event) => {
     if (event.key === "Enter") {
-      const targetIdx = parseInt(event.target.value % currentClip._clip.tracks[0].times.length);
+      const targetIdx = parseInt(event.target.value % currentAction._clip.tracks[0].times.length);  // 실제 프로젝트에서는 timeline 에서 각 점들이 가지고 있는 index
       if (_.isFinite(targetIdx)) {
         setCurrentIndex(targetIdx);
-        currentClip.reset();
-        currentClip.setLoop(1, 1)
-        const targetTime = parseFloat(currentClip._clip.tracks[0].times[targetIdx] / mixer.timeScale);
+        if (!currentAction.isRunning()) { // 한 번도 재생되지 않은 상태에서 특정 시점으로 이동할 경우, 우선 재생 시키고 멈춰야 정상 동작
+          currentAction.play();
+        }
+        mixer.timeScale = 0.3;
+        const targetTime = parseFloat(currentAction._clip.tracks[0].times[targetIdx] / mixer.timeScale);
         mixer.setTime(targetTime);
+        mixer.timeScale = 0;
       }
     }
   }
 
-  useRendering({ id, inputUrl, setLoadedObj, mixer, setMixer })
+  useRendering({ id, inputUrl, setLoadedObj, mixer, setMixer, setTheTransfromControls })
   
-  useReRendering({ mixer, loadedObj, setCurrentClip, setPossibleClips })
+  useReRendering({ mixer, loadedObj, currentAction, setCurrentAction, setPossibleActions, currentIndex, theTransformControls })
   
   return (
     <>
       <Title>Animating Sample</Title>
       <Input type='file' accept='.fbx' onChange={onFileChange}/>
       <RenderingDiv id='renderingDiv'></RenderingDiv>
-      {currentClip &&
+      {currentAction &&
         (<ButtonContainer>
           <Button onClick={onResetButtonClick}>Reset</Button>
           <Button onClick={onBackwardButtonClick}>Backward</Button>
@@ -111,11 +116,11 @@ const App = () => {
           <Button onClick={onPauseButtonClick}>Pause</Button>
           <Button onClick={onStopButtonClick}>Stop</Button>
         </ButtonContainer>)}
-      {currentClip && <Input onKeyPress={onPressEnter} />}
-      {possibleClips.length !== 0 && 
+      {currentAction && <Input onKeyPress={onPressEnter} />}
+      {possibleActions.length !== 0 && 
         (<ButtonContainer>
-          {possibleClips && 
-            possibleClips.map((clip, index) => <Button onClick={() => onAnimButtonClick({ clip })} key={index}>{`Anim #${index + 1}`}</Button>)}
+          {possibleActions && 
+            possibleActions.map((action, index) => <Button onClick={() => onAnimButtonClick({ action })} key={index}>{`Anim #${index + 1}`}</Button>)}
         </ButtonContainer>)}
     </>
   );
