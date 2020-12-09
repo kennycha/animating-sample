@@ -20,7 +20,7 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
     setPossibleActions(fileActions);
   }, [mixer, loadedObj])
 
-  const addConvertingEventlistener = ({ transformControls, animationMixer, targetClip, targetIndex }) => {
+  const addConvertingEventlistener = ({ transformControls, targetClip, targetIndex }) => {
     transformControls.addEventListener('objectChange', (event) => {
       const targetBone = event.target.object
       const targetTrack = _.find(targetClip.tracks, (track) => track.name === `${targetBone.name}.${MODE_MAP[transformControls.mode]}`)
@@ -59,7 +59,7 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
   useEffect(() => {
     if (currentAction) {
       const targetClip = currentAction.getClip()
-      addConvertingEventlistener({ transformControls: theTransformControls, animationMixer: mixer, targetClip, targetIndex: currentIndex });
+      addConvertingEventlistener({ transformControls: theTransformControls, targetClip, targetIndex: currentIndex });
     }
   }, [currentAction, currentIndex])
 }

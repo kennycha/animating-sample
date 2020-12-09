@@ -54,9 +54,27 @@ const App = () => {
     }
   }
 
-  const onResetButtonClick = () => {
+  const onToStartButtonClick = () => {
+    if (!currentAction.isRunning()) { // 한 번도 재생되지 않은 상태에서 특정 시점으로 이동할 경우, 우선 재생 시키고 멈춰야 정상 동작
+      currentAction.play();
+    }
+    mixer.timeScale = 0.3;
     mixer.setTime(0);
-    currentAction.reset();
+    mixer.timeScale = 0;
+  }
+
+  const onToEndButtonClick = () => {
+    const targetIdx = parseInt(currentAction._clip.tracks[0].times.length) - 2;
+    if (_.isFinite(targetIdx)) {
+      setCurrentIndex(targetIdx);
+      if (!currentAction.isRunning()) { // 한 번도 재생되지 않은 상태에서 특정 시점으로 이동할 경우, 우선 재생 시키고 멈춰야 정상 동작
+        currentAction.play();
+      }
+      mixer.timeScale = 0.3;
+      const targetTime = parseFloat(currentAction._clip.tracks[0].times[targetIdx] / mixer.timeScale);
+      mixer.setTime(targetTime);
+      mixer.timeScale = 0;
+    }
   }
   
   const onBackwardButtonClick = () => {
@@ -110,7 +128,8 @@ const App = () => {
       <RenderingDiv id='renderingDiv'></RenderingDiv>
       {currentAction &&
         (<ButtonContainer>
-          <Button onClick={onResetButtonClick}>Reset</Button>
+          <Button onClick={onToStartButtonClick}>To Start</Button>
+          <Button onClick={onToEndButtonClick}>To End</Button>
           <Button onClick={onBackwardButtonClick}>Backward</Button>
           <Button onClick={onForwardButtonClick}>Forward</Button>
           <Button onClick={onPauseButtonClick}>Pause</Button>

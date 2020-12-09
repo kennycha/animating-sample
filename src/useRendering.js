@@ -10,7 +10,7 @@ const MAP_TYPES = ['map', 'aoMap', 'emissiveMap', 'glossinessMap', 'metalnessMap
 
 let innerMixer;
 
-export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer, setTheTransfromControls }) => {
+export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTransfromControls }) => {
   const [contents, setContents] = useState([]);
   const [theScene, setTheScene] = useState(undefined);
   const [currentBone, setCurrentBone] = useState(undefined);
@@ -296,8 +296,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, mixer, setMixer, setT
     let height = window.innerHeight;
     let canvasPixelWidth = canvas.width / window.devicePixelRatio;
     let canvasPixelHeight = canvas.height / window.devicePixelRatio;
-    const needResize =
-    canvasPixelWidth !== width || canvasPixelHeight !== height;
+    const needResize = canvasPixelWidth !== width || canvasPixelHeight !== height;
     if (needResize) {
       const renderingDiv = document.getElementById(id);
       renderer.setSize(renderingDiv?.clientWidth ?? 0, renderingDiv?.clientHeight ?? 0, false)
