@@ -85,6 +85,8 @@ const App = () => {
   const onForwardButtonClick = () => {
     mixer.timeScale = 0.3;
     currentAction.play();
+    console.log(currentAction);
+    console.log(currentAction.getClip());
   }
 
   const onPauseButtonClick = () => {
@@ -119,7 +121,7 @@ const App = () => {
 
   useRendering({ id, inputUrl, setLoadedObj, mixer, setMixer, setTheTransfromControls })
   
-  useReRendering({ mixer, loadedObj, currentAction, setCurrentAction, setPossibleActions, currentIndex, theTransformControls })
+  const cutAction = useReRendering({ mixer, loadedObj, currentAction, setCurrentAction, setPossibleActions, currentIndex, theTransformControls })
   
   return (
     <>
@@ -134,6 +136,8 @@ const App = () => {
           <Button onClick={onForwardButtonClick}>Forward</Button>
           <Button onClick={onPauseButtonClick}>Pause</Button>
           <Button onClick={onStopButtonClick}>Stop</Button>
+          <Button onClick={onStopButtonClick}>Stop</Button>
+          <Button onClick={() => cutAction(currentAction)}>Cut</Button>
         </ButtonContainer>)}
       {currentAction && <Input onKeyPress={onPressEnter} />}
       {possibleActions.length !== 0 && 

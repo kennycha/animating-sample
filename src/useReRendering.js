@@ -17,6 +17,7 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
       return action;
     });
     setCurrentAction(fileActions[0]);
+    console.log(fileActions[0]);
     setPossibleActions(fileActions);
   }, [mixer, loadedObj])
 
@@ -46,8 +47,39 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
           break
         default:
           break;
-      }      
+      }
     })
+  }
+
+  const resetAction = (action) => {
+    console.log('action: ', action);
+    _.forEach(action.getClip().tracks, (track) => {
+      track.times.fill(0);
+      track.values.fill(0);
+    })
+  }
+
+  const cutAction = (action) => {
+    if (action) {
+      const newClip = action.getClip().clone();
+      _.forEach(newClip.tracks, (track) => {
+        track.times = track.times.slice(0, 2);
+        if (_.includes(track.name, 'quaternion')) {
+          track.values = track.values.slice(0, 8);
+        } else {
+          track.values = track.values.slice(0, 6);
+        }
+      });
+      console.log('currentClip: ', action.getClip())
+      console.log('newClip: ', newClip)
+      // console.log('currentClip: ', action.getClip());
+      // console.log('newClip: ', newClip);
+      const newAction = mixer.clipAction(newClip);
+      console.log('currentAction :', action);
+      console.log('newAction :', newAction);
+      setCurrentAction(newAction);
+      console.log(mixer);
+    }
   }
 
   useEffect(() => {
@@ -62,4 +94,5 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
       addConvertingEventlistener({ transformControls: theTransformControls, targetClip, targetIndex: currentIndex });
     }
   }, [currentAction, currentIndex])
+  return cutAction;
 }

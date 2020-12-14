@@ -54,6 +54,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
     camera.position.set(-20, 20, 2);
     camera.lookAt(0, 0, 0);
+    camera.up.set(0, 0, 1);
     return camera;
   }, [])
 
@@ -103,23 +104,28 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
       })
     );
     groundMesh.position.set(0, 0, 0);
-    groundMesh.rotation.x = -Math.PI / 2;
+    // groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.rotation.x = -Math.PI;
     groundMesh.receiveShadow = true;
     scene.add(groundMesh);
 
     const xMaterial = new THREE.LineBasicMaterial({ color: '#EA2027' });
     const yMaterial = new THREE.LineBasicMaterial({ color: '#0652DD' });
+    const zMaterial = new THREE.LineBasicMaterial({ color: '#00A868' });
 
     const xPoints = [new THREE.Vector3(-500, 0, 0), new THREE.Vector3(500, 0, 0)];
     const yPoints = [new THREE.Vector3(0, 0, -500), new THREE.Vector3(0, 0, 500)];
+    const zPoints = [new THREE.Vector3(0, -500, 0), new THREE.Vector3(0, 500, 0)];
 
     const xGeometry = new THREE.BufferGeometry().setFromPoints(xPoints);
     const yGeometry = new THREE.BufferGeometry().setFromPoints(yPoints);
+    const zGeometry = new THREE.BufferGeometry().setFromPoints(zPoints);
 
     const xLine = new THREE.Line(xGeometry, xMaterial);
     const yLine = new THREE.Line(yGeometry, yMaterial);
+    const zLine = new THREE.Line(zGeometry, zMaterial);
 
-    scene.add(xLine, yLine);
+    scene.add(xLine, yLine, zLine);
   }, [])
 
   const createCameraControls = useCallback(({ camera, renderer }) => {
@@ -318,10 +324,12 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
       document.addEventListener('keyup', (event) => onKeyUp({ event, transformControls }));
       const loader = new FBXLoader();
       loader.load(inputUrl, (object) => {
+        console.log(object);
         setLoadedObj(object);
         createMixer({ object });
         const model = addModel({ scene, object });
         const skeletonHelper = addSkeletonHelper({ scene, model });
+        console.log(skeletonHelper);
         addJointMeshes({ skeletonHelper, camera, renderer, cameraControls, transformControls });
       })
     }
