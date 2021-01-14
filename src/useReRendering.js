@@ -90,6 +90,9 @@ export const useReRendering = ({ mixer, loadedObj, currentAction, setCurrentActi
 
   useEffect(() => {
     if (currentAction) {
+      currentAction.play();
+      mixer.timeScale = 0;
+      mixer.setTime(1);
       const targetClip = currentAction.getClip()
       addConvertingEventlistener({ transformControls: theTransformControls, targetClip, targetIndex: currentIndex });
     }

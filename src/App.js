@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { useRendering } from './useRendering'
 import { useReRendering } from './useReRendering'
 import _ from 'lodash'
+import { saveSkeleton } from './skeletonExample'
 
 const Title = styled.div`
   height: 50px;
@@ -138,6 +139,7 @@ const App = () => {
           <Button onClick={onStopButtonClick}>Stop</Button>
           <Button onClick={onStopButtonClick}>Stop</Button>
           <Button onClick={() => cutAction(currentAction)}>Cut</Button>
+          <Button onClick={saveSkeleton}>Save Skeleton</Button>
         </ButtonContainer>)}
       {currentAction && <Input onKeyPress={onPressEnter} />}
       {possibleActions.length !== 0 && 
