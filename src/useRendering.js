@@ -10,9 +10,8 @@ const MAP_TYPES = ['map', 'aoMap', 'emissiveMap', 'glossinessMap', 'metalnessMap
 
 let innerMixer;
 
-export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTransfromControls }) => {
+export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTransfromControls, theScene, setTheScene }) => {
   const [contents, setContents] = useState([]);
-  const [theScene, setTheScene] = useState(undefined);
   const [currentBone, setCurrentBone] = useState(undefined);
 
   const clock = new THREE.Clock();
@@ -20,7 +19,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
   const createScene = useCallback(() => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xbbbbbb);
-    scene.fog = new THREE.Fog(0xbbbbbb, 10, 80);
+    // scene.fog = new THREE.Fog(0xbbbbbb, 10, 80);
     setTheScene(scene);
     return scene;
   }, [])
@@ -54,7 +53,7 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
     camera.position.set(-20, 20, 2);
     camera.lookAt(0, 0, 0);
-    camera.up.set(0, 0, 1);
+    // camera.up.set(0, 0, 1);
     return camera;
   }, [])
 
@@ -104,8 +103,8 @@ export const useRendering = ({ id, inputUrl, setLoadedObj, setMixer, setTheTrans
       })
     );
     groundMesh.position.set(0, 0, 0);
-    // groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.rotation.x = -Math.PI;
+    groundMesh.rotation.x = -Math.PI / 2;
+    // groundMesh.rotation.x = -Math.PI;
     groundMesh.receiveShadow = true;
     scene.add(groundMesh);
 
