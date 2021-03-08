@@ -229,6 +229,7 @@ const App = () => {
       const targetAction = addedActions[actionIndex]
       const targetClip = targetAction.getClip()
       let newTracks = _.clone(targetClip.tracks)
+      let newClip;
       if (trackIndex < targetClip.tracks.length) {
         const targetTrack = targetClip.tracks[trackIndex]
         let newTimes = _.clone(targetTrack.times)
@@ -237,7 +238,6 @@ const App = () => {
         if (timeIndex === -1) {
           // 해당 time 이 track 의 times 내에 존재하지 않는 경우
           // 키프레임 추가에 해당
-          let newClip;
           if (timeValue > targetTrack.times[targetTrack.times.length - 1]) {  // 추가되는 time 이 duration 보다 뒤일 때
             newTimes = [...newTimes, timeValue]
             newValues = [...newValues, ...values]
@@ -274,11 +274,6 @@ const App = () => {
               newTracks
             )
           }
-          console.log('newClip: ', newClip)
-          currentAction.stop()
-          const newAction = mixer.clipAction(newClip)
-          console.log('newAction: ', newAction)
-          setCurrentAction(newAction)
         } else {  // -> 정상 동작
           // 해당 time 이 track 의 times 내에 존재하는 경우
           // 키프레임 수정에 해당
@@ -296,8 +291,19 @@ const App = () => {
             newValues[(timeIndex * 3) + 1] = values[1]
             newValues[(timeIndex * 3) + 2] = values[2]
           }
-          targetTrack.values = newValues
+          newTracks = [..._.slice(newTracks, 0, trackIndex), new THREE.VectorKeyframeTrack(targetTrack.name, newTimes, newValues), ..._.slice(newTracks, trackIndex + 1)]
+          newClip = new THREE.AnimationClip(
+            targetClip.name,
+            targetClip.duration,
+            newTracks
+          )
         }
+        console.log('newClip: ', newClip)
+        currentAction.stop()
+        const newAction = mixer.clipAction(newClip)
+        console.log('newAction: ', newAction)
+        setCurrentAction(newAction)
+
       }
     }
   }
@@ -307,7 +313,7 @@ const App = () => {
       mixer,
       actionIndex: 0,
       trackIndex: 138,
-      timeValue: 0.0123,
+      timeValue: 0,
       values: [1000, 0, 0],
       type: 'position' 
     })
